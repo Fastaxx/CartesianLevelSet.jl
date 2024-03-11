@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/Fastaxx/CartesianLevelSet.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/Fastaxx/CartesianLevelSet.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
-# Overview
+## Overview
 
 CartesianLevelSet is a Julia package for working with level set methods on Cartesian grids. It provides functionality for defining signed distance functions (SDFs), generating Cartesian grids, evaluating level sets, computing normals, and visualizing level sets and their intersections with grid cells.
 
@@ -31,6 +31,8 @@ circle_sdf_function = (x, y, _=0) -> sqrt(x^2 + y^2) - 1.0
 
 # Create a SignedDistanceFunction object for the circle
 circle_sdf = SignedDistanceFunction(circle_sdf_function, ((-2.0, -2.0), (2.0, 2.0)))
+circle_sdf2 = SignedDistanceFunction((x, y, _=0) -> sqrt((x-0.5)^2 + (y-0.5)^2) - 1.0)
+union_circle = circle1 ⊔ circle2
 
 # Evaluate the SDF at a specific point
 x_test, y_test = 0.5, 0.5
@@ -55,7 +57,12 @@ midpoints = get_segment_midpoints(cut_cells)
 plot_cut_cells_levelset_intersections_and_midpoints(levelset_values, cut_cells, intersection_points, midpoints)
 ```
 
-For more detailed usage instructions and documentation, refer to the [documentation](link-to-your-documentation).
+## TODO
+- Compute Curvature (Hessian)
+- Sdf -> Sdf(x,t) : Map t + Velocity
+- Driver for VOFI/CartesianGeometry
+- Docs
+- Notebooks
 
 ## Contributing
 
