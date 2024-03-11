@@ -32,7 +32,7 @@ function plot_cut_cells_levelset_intersections_and_midpoints(cut_cells, values, 
 end
 
 # Définir une fonction pour tracer une SignedDistanceFunction 2D
-function plot_sdf_2d(sdf::SignedDistanceFunction; resolution=100)
+function plot_sdf_2d(sdf, resolution=100)
     x_min, y_min = sdf.domain[1]
     x_max, y_max = sdf.domain[2]
     x_range = LinRange(x_min, x_max, resolution)

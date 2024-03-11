@@ -40,3 +40,17 @@ function complement(a::SignedDistanceFunction{T}) where T
     sdf(x::Vararg{Float64}) = -a.sdf_function(x...)
     SignedDistanceFunction(sdf, a.domain)
 end
+
+function compute_normal(sdf::SignedDistanceFunction, x, y)
+    # Envelopper la fonction SDF dans une fonction prenant un seul argument
+    sdf_func = (p) -> sdf.sdf_function(p[1], p[2])
+
+    # Calculer la distance et le gradient de la SDF au point (x, y)
+    nx, ny = ForwardDiff.gradient(sdf_func, [x, y])
+    # Normaliser le gradient pour obtenir la normale
+    norm = sqrt(nx^2 + ny^2)
+    nx = nx / norm
+    ny = ny / norm
+
+    return nx, ny
+end

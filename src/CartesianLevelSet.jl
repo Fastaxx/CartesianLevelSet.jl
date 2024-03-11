@@ -3,6 +3,7 @@ module CartesianLevelSet
 using CartesianGeometry
 using Plots
 Plots.default(show = true)
+using ForwardDiff
 
 export CartesianGrid
 export calculate_volume, generate_mesh
@@ -12,6 +13,7 @@ export plot_cut_cells_levelset_intersections_and_midpoints
 include("mesh.jl")
 include("geometry.jl")
 include("plot.jl")
+include("body.jl")
 
 grid = CartesianGrid(20, 20 , 1., 1.)
 mesh = generate_mesh(grid, false) # Génère un maillage 
