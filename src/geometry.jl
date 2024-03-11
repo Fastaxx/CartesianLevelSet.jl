@@ -1,4 +1,4 @@
-function evaluate_levelset(levelset, mesh)
+function evaluate_levelset(levelset::Function, mesh::Tuple{Vector{T}, Vector{T}}) where T
     x, y = mesh
     values = [levelset(x[i], y[j]) for i in 1:length(x), j in 1:length(y)]
     return values
@@ -33,14 +33,16 @@ function get_intersection_points(values, cut_cells)
         # Parcourir toutes les arêtes de la cellule
         for (di, dj) in [(0, 1), (1, 0), (0, -1), (-1, 0)]
             # Vérifier si la Level Set change de signe le long de cette arête
-            if values[i, j] * values[i+di, j+dj] < 0
-                # Si c'est le cas, calculer le point d'intersection
-                t = values[i, j] / (values[i, j] - values[i+di, j+dj])
-                x_intersect = j + t * dj
-                y_intersect = i + t * di
+            if 1<=i+di<= size(values, 1) && 1 <= j+dj <= size(values, 2)
+                if values[i, j] * values[i+di, j+dj] < 0
+                    # Si c'est le cas, calculer le point d'intersection
+                    t = values[i, j] / (values[i, j] - values[i+di, j+dj])
+                    x_intersect = j + t * dj
+                    y_intersect = i + t * di
 
-                # Ajouter le point d'intersection à la liste
-                push!(intersection_points, (x_intersect, y_intersect))
+                    # Ajouter le point d'intersection à la liste
+                    push!(intersection_points, (x_intersect, y_intersect))
+                end
             end
         end
     end
