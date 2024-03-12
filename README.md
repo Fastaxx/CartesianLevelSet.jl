@@ -25,13 +25,14 @@ grid = CartesianGrid(20, 20, 1.0, 1.0)
 
 # Generate a mesh from the grid
 mesh = generate_mesh(grid)
+domain =  ((-2.0, -2.0), (2.0, 2.0))
 
 # Define a signed distance function (SDF) for a circle
 circle_sdf_function = (x, y, _=0) -> sqrt(x^2 + y^2) - 1.0
 
 # Create a SignedDistanceFunction object for the circle
-circle_sdf = SignedDistanceFunction(circle_sdf_function, ((-2.0, -2.0), (2.0, 2.0)))
-circle_sdf2 = SignedDistanceFunction((x, y, _=0) -> sqrt((x-0.5)^2 + (y-0.5)^2) - 1.0)
+circle_sdf = SignedDistanceFunction(circle_sdf_function, domain)
+circle_sdf2 = SignedDistanceFunction((x, y, _=0) -> sqrt((x-0.5)^2 + (y-0.5)^2) - 1.0, domain)
 union_circle = circle1 ⊔ circle2
 
 # Evaluate the SDF at a specific point
@@ -51,7 +52,7 @@ cut_cells = get_cut_cells(levelset_values)
 intersection_points = get_intersection_points(levelset_values, cut_cells)
 
 # Get midpoints of segments formed by intersected grid cells
-midpoints = get_segment_midpoints(cut_cells)
+midpoints = get_segment_midpoints(levelset_values, cut_cells, intersection_points)
 
 # Plot the level set, cut cells, intersection points, and midpoints
 plot_cut_cells_levelset_intersections_and_midpoints(levelset_values, cut_cells, intersection_points, midpoints)
