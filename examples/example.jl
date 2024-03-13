@@ -1,8 +1,9 @@
 using CartesianLevelSet
 using Plots
 Plots.default(show = true)
+
 # Définition d'une grille cartésienne 2D
-grid = CartesianGrid((10, 10), (2.0, 2.0)) # Crée une grille 2D de 10x10 avec un espacement de 1.0
+grid = CartesianGrid((10, 10), (2.0, 2.0)) # Crée une grille 2D de 10x10 avec un espacement de 2.0
 mesh = generate_mesh(grid, false) # Génère un maillage collocated
 x, y = mesh # Décompose le maillage en ses composantes x et y
 domain = ((minimum(x), minimum(y)), (maximum(x), maximum(y))) # Définit le domaine de la fonction SDF
@@ -74,44 +75,3 @@ midpoints = get_segment_midpoints(values, cut_cells, intersection_points)
 # Trace les cellules coupées, les points d'intersection et les points médians
 plot_cut_cells_levelset_intersections_and_midpoints(cut_cells, values, intersection_points, midpoints)
 readline()
-
-
-"""
-
-
-mesh = generate_mesh(grid, false) # Génère un maillage 
-x, y = mesh
-
-# Définir une fonction SDF simple en 2D (un cercle) : LE 3e Arguments EST OBLIGATORI POUR VOFI METTRE _=0
-
-
-domain = ((minimum(x), minimum(y)), (maximum(x), maximum(y)))
-circle = SignedDistanceFunction((x, y, _=0) -> sqrt(x^2+y^2) - 1.0 , domain)
-
-values = evaluate_levelset(circle.sdf_function, mesh)
-
-levelset = HyperSphere(0.25, (0.5, 0.5))
-V, bary = integrate(Tuple{0}, circle.sdf_function, mesh, T, nan)
-As = integrate(Tuple{1}, circle.sdf_function, mesh, T, zero)
-Ws = integrate(Tuple{0}, circle.sdf_function, mesh, T, zero, bary)
-Bs = integrate(Tuple{1}, circle.sdf_function, mesh, T, zero, bary)
-@show Bs
-@show V
-
-cut_cells = get_cut_cells(values)
-@show cut_cells
-
-intersection_points = get_intersection_points(values, cut_cells)
-@show intersection_points
-
-midpoints = get_segment_midpoints(values, cut_cells, intersection_points)
-@show size(cut_cells)
-@show size(intersection_points)
-@show size(midpoints)
-@show midpoints
-
-plot_cut_cells_levelset_intersections_and_midpoints(cut_cells, values, intersection_points, midpoints)
-
-
-end
-"""
