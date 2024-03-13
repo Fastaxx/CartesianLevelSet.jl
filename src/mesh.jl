@@ -1,24 +1,35 @@
+struct InvalidDimensionException{N} <: Exception end
+
+Base.showerror(io::IO, ::InvalidDimensionException{N}) where {N} =
+    print(io, "Dimension is not valid: $(N).")
+
 struct CartesianGrid{N,I<:Integer,T<:Number}
     n::NTuple{N,I}
     spacing::NTuple{N,T}
-end
-function calculate_volume(grid::CartesianGrid)
-    if length(grid.n) == 3
-        return prod(grid.n) * prod(grid.spacing)
-    elseif length(grid.n) == 2
-        return prod(grid.n) * prod(grid.spacing)
-    elseif length(grid.n) == 1
-        return grid.n[1] * grid.spacing[1]
-    else
-        error("Invalid dimension: $(length(grid.n)). Dimension must be 1 or 2 or 3.")
+
+    function CartesianGrid(n::NTuple{N,I}, spacing::NTuple{N,T}) where {N,I<:Integer,T<:Number}
+        0 < N < 4 || throw(InvalidDimensionException{N}())
+        new{N,I,T}(n, spacing)
     end
 end
-function generate_mesh(grid::CartesianGrid{N, I, T}, staggered::Bool=false) where {N, I, T}
-    lo = zero(T)
+
+Base.ndims(::CartesianGrid{N}) where {N} = N
+Base.size(grid::CartesianGrid) = grid.n
+spacing(grid::CartesianGrid) = grid.spacing
+
+calculate_volume(grid::CartesianGrid) =
+    prod(size(grid)) * prod(spacing(grid))
+
+function generate_mesh(grid::CartesianGrid{N,I}, staggered::Bool=false) where {N,I}
+    lo = zero(I)
+
     if staggered
-        mesh = [ [(grid.spacing[i] * ((2*(j-lo) + 1) / (2*(grid.n[i]-lo+1)))) for j in 0:grid.n[i]+1] for i in 1:N ]
+        map(size(grid), spacing(grid)) do n, h
+            [h * (2(i-lo) + 1) / (2(n-lo+1)) for i in 0:n+1]
+        end
     else
-        mesh = [ [(grid.spacing[i] * ((j-lo) / (grid.n[i]-lo+1))) for j in 0:grid.n[i]] for i in 1:N ]
+        map(size(grid), spacing(grid)) do n, h
+            [(h * ((i-lo) / (n-lo+1))) for i in 0:n]
+        end
     end
-    return tuple(mesh...)
 end
