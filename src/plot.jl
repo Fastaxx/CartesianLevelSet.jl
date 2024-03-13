@@ -18,7 +18,7 @@ function plot_cut_cells_levelset_intersections_and_midpoints(cut_cells, values, 
     end
 
     # Afficher le tracé
-    readline()
+    
 end
 
 # Définir une fonction pour tracer une SignedDistanceFunction 2D
@@ -28,5 +28,4 @@ function plot_sdf_2d(sdf, resolution=100)
     x_range = LinRange(x_min, x_max, resolution)
     y_range = LinRange(y_min, y_max, resolution)
     contour(x_range, y_range, (x, y) -> evaluate_sdf(sdf, x, y), levels=[0], color=:black, xlabel="x", ylabel="y", aspect_ratio=:equal, xlims=(x_min, x_max), ylims=(y_min, y_max))
-    readline()
 end
