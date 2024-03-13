@@ -1,62 +1,76 @@
-function evaluate_levelset(f::Function, mesh::Tuple{AbstractVector{T}}) where T
+function evaluate_levelset(f::Function, mesh::Tuple{AbstractVector})
     x = mesh[1]
-    values = [f(x[i]) for i in 1:length(x)]
-    return values
+    [f(i) for i in x]
 end
-function evaluate_levelset(f::Function, mesh::NTuple{2,AbstractVector{T}}) where T
+
+function evaluate_levelset(f::Function, mesh::NTuple{2,AbstractVector})
     x, y = mesh
-    values = [f(x[i], y[j]) for i in 1:length(x), j in 1:length(y)]
-    return values
+    [f(i, j) for i in x, j in y]
 end
-function evaluate_levelset(f::Function, mesh::NTuple{3,AbstractVector{T}}) where T
+
+function evaluate_levelset(f::Function, mesh::NTuple{3,AbstractVector})
     x, y, z = mesh
-    values = [f(x[i], y[j], z[k]) for i in 1:length(x), j in 1:length(y), k in 1:length(z)]
-    return values
+    [f(i, j, k) for i in x, j in y, k in z]
 end
 
-function get_cut_cells(values::AbstractArray{T, 1}) where T
-    cut_cells = CartesianIndex[]
-    for i in 1:length(values)-1
-        if values[i] * values[i+1] < 0
+function get_cut_cells(values::AbstractVector)
+    cut_cells = similar(values, CartesianIndex{1}, 0)
+
+    for i in axes(values, 1)[begin:end-1]
+        values[i] * values[i+1] < 0 &&
             push!(cut_cells, CartesianIndex(i))
-        end
     end
-    return cut_cells
-end
-function get_cut_cells(values::AbstractArray{T, 2}) where T
-    cut_cells = CartesianIndex[]
-    for i in 1:size(values, 1)-1
-        for j in 1:size(values, 2)-1
-            if values[i, j] * values[i+1, j] < 0 || values[i, j] * values[i, j+1] < 0 || values[i+1, j] * values[i+1, j+1] < 0 || values[i, j+1] * values[i+1, j+1] < 0 
-                push!(cut_cells, CartesianIndex(i, j))
-            end
-        end
-    end
-    return cut_cells
-end
-function get_cut_cells(values::AbstractArray{T, 3}) where T
-    cut_cells = CartesianIndex[]
-    for i in 1:size(values, 1)-1
-        for j in 1:size(values, 2)-1
-            for k in 1:size(values, 3)-1
-                if values[i, j, k] * values[i+1, j, k] < 0 || values[i, j, k] * values[i, j+1, k] < 0 || values[i, j, k] * values[i, j, k+1] < 0 || 
-                   values[i+1, j, k] * values[i+1, j+1, k] < 0 || values[i+1, j, k] * values[i+1, j, k+1] < 0 || values[i, j+1, k] * values[i, j+1, k+1] < 0 || 
-                   values[i, j, k+1] * values[i+1, j, k+1] < 0 || values[i, j, k+1] * values[i, j+1, k+1] < 0 || values[i+1, j+1, k] * values[i+1, j+1, k+1] < 0
-                    push!(cut_cells, CartesianIndex(i, j, k))
-                end
-            end
-        end
-    end
-    return cut_cells
+
+    cut_cells
 end
 
-function get_intersection_points(values::AbstractArray{T,1}, cut_cells) where T
+function get_cut_cells(values::AbstractMatrix)
+    cut_cells = similar(values, CartesianIndex{2}, 0)
+
+    for j in axes(values, 2)[begin:end-1]
+        for i in axes(values, 1)[begin:end-1]
+            (values[i, j] * values[i+1, j] < 0 ||
+             values[i, j] * values[i, j+1] < 0 ||
+             values[i+1, j] * values[i+1, j+1] < 0 ||
+             values[i, j+1] * values[i+1, j+1] < 0) &&
+                push!(cut_cells, CartesianIndex(i, j))
+        end
+    end
+
+    cut_cells
+end
+
+function get_cut_cells(values::AbstractArray{<:Any,3})
+    cut_cells = similar(values, CartesianIndex{3}, 0)
+
+    for k in axes(values, 3)[begin:end-1]
+        for j in axes(values, 2)[begin:end-1]
+            for i in axes(values, 1)[begin:end-1]
+                (values[i, j, k] * values[i+1, j, k] < 0 ||
+                 values[i, j, k] * values[i, j+1, k] < 0 ||
+                 values[i, j, k] * values[i, j, k+1] < 0 ||
+                 values[i+1, j, k] * values[i+1, j+1, k] < 0 ||
+                 values[i+1, j, k] * values[i+1, j, k+1] < 0 ||
+                 values[i, j+1, k] * values[i, j+1, k+1] < 0 ||
+                 values[i, j, k+1] * values[i+1, j, k+1] < 0 ||
+                 values[i, j, k+1] * values[i, j+1, k+1] < 0 ||
+                 values[i+1, j+1, k] * values[i+1, j+1, k+1] < 0) &&
+                    push!(cut_cells, CartesianIndex(i, j, k))
+            end
+        end
+    end
+
+    cut_cells
+end
+
+function get_intersection_points(values::AbstractVector{T}, cut_cells) where {T}
     # Initialiser un tableau vide pour stocker les points d'intersection
-    intersection_points = Tuple{Float64}[]
+    intersection_points = similar(cut_cells, Tuple{T}, 0)
 
     # Parcourir toutes les cellules coupées
     for index in cut_cells
-        i = index.I[1]
+        i, = Tuple(index)
+
         # Vérifier si la Level Set change de signe le long de cette arête
         if values[i] * values[i+1] < 0
             # Si c'est le cas, calculer le point d'intersection
@@ -68,18 +82,19 @@ function get_intersection_points(values::AbstractArray{T,1}, cut_cells) where T
         end
     end
 
-    return intersection_points
+    intersection_points
 end
-function get_intersection_points(values::AbstractArray{T,2}, cut_cells) where T
+
+function get_intersection_points(values::AbstractMatrix{T}, cut_cells) where {T}
     # Initialiser un tableau vide pour stocker les points d'intersection
-    intersection_points = Tuple{Float64, Float64}[]
+    intersection_points = similar(cut_cells, NTuple{2,T}, 0)
 
     # Parcourir toutes les cellules coupées
-    for cell in cut_cells
-        i, j = cell.I
+    for index in cut_cells
+        i, j = Tuple(index)
 
         # Parcourir toutes les arêtes de la cellule
-        for (di, dj) in [(0, 1), (1, 0), (0, -1), (-1, 0)]
+        for (di, dj) in ((0, 1), (1, 0), (0, -1), (-1, 0))
             # Vérifier si la Level Set change de signe le long de cette arête
             if 1<=i+di<= size(values, 1) && 1 <= j+dj <= size(values, 2)
                 if values[i, j] * values[i+di, j+dj] < 0
@@ -95,18 +110,19 @@ function get_intersection_points(values::AbstractArray{T,2}, cut_cells) where T
         end
     end
 
-    return intersection_points
+    intersection_points
 end
-function get_intersection_points(values::AbstractArray{T, 3}, cut_cells) where T
+
+function get_intersection_points(values::AbstractArray{T,3}, cut_cells) where {T}
     # Initialiser un tableau vide pour stocker les points d'intersection
-    intersection_points = Tuple{Float64, Float64, Float64}[]
+    intersection_points = similar(cut_cells, NTuple{3,T}, 0)
 
     # Parcourir toutes les cellules coupées
-    for cell in cut_cells
-        i, j, k = cell.I
+    for index in cut_cells
+        i, j, k = Tuple(index)
 
         # Parcourir toutes les arêtes de la cellule
-        for (di, dj, dk) in [(0, 1, 0), (1, 0, 0), (0, -1, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1)]
+        for (di, dj, dk) in ((0, 1, 0), (1, 0, 0), (0, -1, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1))
             # Vérifier si la Level Set change de signe le long de cette arête
             if 1<=i+di<= size(values, 1) && 1 <= j+dj <= size(values, 2) && 1 <= k+dk <= size(values, 3)
                 if values[i, j, k] * values[i+di, j+dj, k+dk] < 0
@@ -123,16 +139,16 @@ function get_intersection_points(values::AbstractArray{T, 3}, cut_cells) where T
         end
     end
 
-    return intersection_points
+    intersection_points
 end
 
-function get_segment_midpoints(values::AbstractArray{T,1}, cut_cells, intersection_points) where T
+function get_segment_midpoints(values::AbstractVector, cut_cells, intersection_points)
     # Initialiser un tableau vide pour stocker les points médians
-    midpoints::Vector{Tuple{Float64}} = []
+    midpoints = similar(intersection_points, 0)
 
     # Parcourir toutes les cellules coupées
-    for cell in cut_cells
-        i = cell.I[1]
+    for index in cut_cells
+        i, = Tuple(index)
 
         # Récupérer les points d'intersection sur cette cellule
         cell_points = [point for point in intersection_points if point[1] >= i && point[1] <= i+1]
@@ -145,15 +161,16 @@ function get_segment_midpoints(values::AbstractArray{T,1}, cut_cells, intersecti
         push!(midpoints, midpoint)
     end
 
-    return midpoints
+    midpoints
 end
-function get_segment_midpoints(values::AbstractArray{T,2}, cut_cells, intersection_points) where T
+
+function get_segment_midpoints(values::AbstractMatrix, cut_cells, intersection_points)
     # Initialiser un tableau vide pour stocker les points médians
-    midpoints::Vector{Tuple{Float64, Float64}} = []
+    midpoints = similar(intersection_points, 0)
 
     # Parcourir toutes les cellules coupées
-    for cell in cut_cells
-        i, j = cell.I
+    for index in cut_cells
+        i, j = Tuple(index)
 
         # Récupérer les points d'intersection sur cette cellule
         cell_points = [point for point in intersection_points if point[1] >= j && point[1] <= j+1 && point[2] >= i && point[2] <= i+1]
@@ -167,15 +184,16 @@ function get_segment_midpoints(values::AbstractArray{T,2}, cut_cells, intersecti
         push!(midpoints, midpoint)
     end
 
-    return midpoints
+    midpoints
 end
-function get_segment_midpoints(values::AbstractArray{T,3}, cut_cells, intersection_points) where T
+
+function get_segment_midpoints(values::AbstractArray{<:Any,3}, cut_cells, intersection_points)
     # Initialiser un tableau vide pour stocker les points médians
-    midpoints::Vector{Tuple{Float64, Float64, Float64}} = []
+    midpoints = similar(intersection_points, 0)
 
     # Parcourir toutes les cellules coupées
-    for cell in cut_cells
-        i, j, k = cell.I
+    for index in cut_cells
+        i, j, k = Tuple(index)
 
         # Récupérer les points d'intersection sur cette cellule
         cell_points = [point for point in intersection_points if point[1] >= j && point[1] <= j+1 && point[2] >= i && point[2] <= i+1 && point[3] >= k && point[3] <= k+1]
