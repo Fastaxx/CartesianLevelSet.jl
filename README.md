@@ -21,10 +21,10 @@ using CartesianLevelSet
 using Plots
 
 # Define a Cartesian grid
-grid = CartesianGrid(20, 20, 1.0, 1.0)
+grid = CartesianGrid((10, 10), (2.0, 2.0))
 
 # Generate a mesh from the grid
-mesh = generate_mesh(grid)
+mesh = generate_mesh(grid, false)
 domain =  ((-2.0, -2.0), (2.0, 2.0))
 
 # Define a signed distance function (SDF) for a circle
@@ -59,7 +59,6 @@ plot_cut_cells_levelset_intersections_and_midpoints(levelset_values, cut_cells, 
 ```
 
 ## TODO
-- Compute Curvature (Hessian)
 - Sdf -> Sdf(x,t) : Map t + Velocity
 - Driver for VOFI/CartesianGeometry
 - Docs

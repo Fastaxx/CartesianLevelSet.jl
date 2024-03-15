@@ -54,3 +54,29 @@ function compute_normal(sdf::SignedDistanceFunction, x, y)
 
     return nx, ny
 end
+
+function compute_curvatures(sdf::SignedDistanceFunction, x, y)
+    # Envelopper la fonction SDF dans une fonction prenant un seul argument
+    sdf_func = (p) -> sdf.sdf_function(p[1], p[2])
+
+    # Calculer la distance et le gradient de la SDF au point (x, y)
+    _, grad = ForwardDiff.gradient(sdf_func, [x, y])
+    # Calculer la dérivée seconde de la SDF
+    d2sdf = ForwardDiff.hessian(sdf_func, [x, y])
+
+    H,K = 0.5*tr(d2sdf)
+    return H, K
+end
+function compute_curvatures(sdf::SignedDistanceFunction, x, y, z)
+    # Envelopper la fonction SDF dans une fonction prenant un seul argument
+    sdf_func = (p) -> sdf.sdf_function(p[1], p[2], p[3])
+
+    # Calculer la distance et le gradient de la SDF au point (x, y)
+    _, grad = ForwardDiff.gradient(sdf_func, [x, y, z])
+    # Calculer la dérivée seconde de la SDF
+    d2sdf = ForwardDiff.hessian(sdf_func, [x, y, z])
+
+    # En 3D, K=tr(minor(A)) et K=0 en 2D.
+    H = 0.5*tr(d2sdf)
+    K = d2sdf[1,1]*d2sdf[2,2]+d2sdf[1,1]*d2sdf[3,3]+d2sdf[2,2]*d2sdf[3,3]-d2sdf[1,2]^2-d2sdf[1,3]^2-d2sdf[2,3]^2
+end

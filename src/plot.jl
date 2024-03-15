@@ -5,8 +5,8 @@ function plot_cut_cells_levelset_intersections_and_midpoints(cut_cells, values, 
     # Ajouter chaque cellule coupée au tracé
     for cell in cut_cells
         # Calculer les coordonnées du coin inférieur gauche de la cellule
-        x = cell[2]
-        y = cell[1]
+        x = cell[1]
+        y = cell[2]
 
         # Ajouter un carré représentant la cellule au tracé
         plot!([x, x+1, x+1, x, x], [y, y, y+1, y+1, y], fill = true, color = :blue, alpha=0.5)
