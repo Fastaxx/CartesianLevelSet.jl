@@ -80,3 +80,28 @@ function compute_curvatures(sdf::SignedDistanceFunction, x, y, z)
     H = 0.5*tr(d2sdf)
     K = d2sdf[1,1]*d2sdf[2,2]+d2sdf[1,1]*d2sdf[3,3]+d2sdf[2,2]*d2sdf[3,3]-d2sdf[1,2]^2-d2sdf[1,3]^2-d2sdf[2,3]^2
 end
+
+
+function sdf_to_curve(X, curve)
+    # Define a function to calculate the distance between a point X and the curve for a given t
+    squared_distance(t) = sum((X - curve(t)).^2)
+    
+    # Find the t value that minimizes the squared distance
+    result = optimize(squared_distance, 0, 1)  # Use optimization to find minimum
+    
+    # Calculate the signed distance and corresponding t value
+    t_min = result.minimizer
+    distance = sqrt(result.minimum)
+    
+    # Determine the sign of the distance
+    t_before = max(0, t_min - 0.01)
+    t_after = min(1, t_min + 0.01)
+    point_before = curve(t_before)
+    point_after = curve(t_after)
+    cross_product_z = (point_after[1] - point_before[1]) * (X[2] - point_before[2]) - (point_after[2] - point_before[2]) * (X[1] - point_before[1])
+    sign = cross_product_z >= 0 ? -1 : 1
+
+    # Return the signed distance
+    signed_distance = sign * distance
+    return signed_distance
+end
