@@ -18,6 +18,7 @@ function evaluate_sdf(sdf::SignedDistanceFunction, t, x...)
     end
     return sdf.sdf_function(transformed_coordinates...)
 end
+
 # Définir une fonction SDF simple en 2D (un cercle)
 function circle_sdf(x, y)
     return sqrt(x^2 + y^2) - 1.0
@@ -26,6 +27,12 @@ end
 # Définir une fonction SDF simple en 3D (une sphère)
 function sphere_sdf(x, y, z)
     return sqrt(x^2 + y^2 + z^2) - 1.0
+end
+
+function square_sdf(x::Float64, y::Float64, side_length::Float64)
+    dx = abs(x) - side_length / 2
+    dy = abs(y) - side_length / 2
+    return max(dx, dy)
 end
 
 # Définir une fonction de transformation qui effectue une rotation et un déplacement
@@ -41,27 +48,22 @@ function translate(x, y, t)
     return [x + dx, y + dy]
 end
 
+stationary_transform(x, t) = x
+
 function evaluate_levelset(sdf::SignedDistanceFunction, t, mesh::NTuple{2,AbstractVector})
     x, y = mesh
     [evaluate_sdf(sdf, t, xi, yi) for xi in x, yi in y]
 end
 
+
 grid = CartesianGrid((10, 10), (2.0, 2.0)) # Crée une grille 2D de 10x10 avec un espacement de 2.0
 mesh = generate_mesh(grid, false) # Génère un maillage collocated
-
-# Créer une SDF avec une fonction de transformation
-sdf = SignedDistanceFunction(circle_sdf, rotate_and_translate, ((-2.0, 2.0), (-2.0, 2.0)), true)
 
 # Créer une grille de points
 x = y = range(-2, stop=2, length=100)
 
-# Évaluer la SDF à chaque point à un moment donné
-t = 2.0  # Vous pouvez changer cela pour voir comment la SDF évolue avec le temps
-z = [evaluate_sdf(sdf, t, xi, yi) for xi in x, yi in y]
-
-# Tracer les lignes de niveau de la SDF
-contour(x, y, z)
-readline()
+# Créer une SDF avec une fonction de transformation
+sdf = SignedDistanceFunction(circle_sdf, rotate_and_translate, ((-2.0, 2.0), (-2.0, 2.0)), true)
 
 # Cas instationnaire
 for t = 0:1:5
@@ -79,6 +81,7 @@ cut_cells = get_cut_cells(values)
 intersection_points = get_intersection_points(values, cut_cells)
 midpoints = get_segment_midpoints(values, cut_cells, intersection_points)
 
+# Cas Plusieurs géométries
 
 """
 # Définir une fonction pour calculer la vitesse ẋ de la transformation ξ=m(x,t):
