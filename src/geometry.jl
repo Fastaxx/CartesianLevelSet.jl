@@ -2,12 +2,10 @@ function evaluate_levelset(f::Function, mesh::Tuple{AbstractVector})
     x = mesh[1]
     [f(i) for i in x]
 end
-
 function evaluate_levelset(f::Function, mesh::NTuple{2,AbstractVector})
     x, y = mesh
     [f(i, j) for i in x, j in y]
 end
-
 function evaluate_levelset(f::Function, mesh::NTuple{3,AbstractVector})
     x, y, z = mesh
     [f(i, j, k) for i in x, j in y, k in z]
@@ -23,7 +21,6 @@ function get_cut_cells(values::AbstractVector)
 
     cut_cells
 end
-
 function get_cut_cells(values::AbstractMatrix)
     cut_cells = similar(values, CartesianIndex{2}, 0)
 
@@ -39,7 +36,6 @@ function get_cut_cells(values::AbstractMatrix)
 
     cut_cells
 end
-
 function get_cut_cells(values::AbstractArray{<:Any,3})
     cut_cells = similar(values, CartesianIndex{3}, 0)
 
@@ -84,7 +80,6 @@ function get_intersection_points(values::AbstractVector{T}, cut_cells) where {T}
 
     intersection_points
 end
-
 function get_intersection_points(values::AbstractMatrix{T}, cut_cells) where {T}
     # Initialiser un tableau vide pour stocker les points d'intersection
     intersection_points = similar(cut_cells, NTuple{2,T}, 0)
@@ -112,7 +107,6 @@ function get_intersection_points(values::AbstractMatrix{T}, cut_cells) where {T}
 
     intersection_points
 end
-
 function get_intersection_points(values::AbstractArray{T,3}, cut_cells) where {T}
     # Initialiser un tableau vide pour stocker les points d'intersection
     intersection_points = similar(cut_cells, NTuple{3,T}, 0)

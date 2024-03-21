@@ -3,7 +3,6 @@ module CartesianLevelSet
 using Plots
 Plots.default(show = true)
 using ForwardDiff
-using Optim
 
 export CartesianGrid, SignedDistanceFunction
 export circle_sdf, sphere_sdf, evaluate_sdf, ⊔, ⊓, ⊖, complement, compute_normal, compute_curvatures, sdf_to_curve

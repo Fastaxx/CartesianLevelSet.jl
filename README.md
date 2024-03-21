@@ -1,10 +1,10 @@
-# CartesianLevelSet
+# CartesianLevelSet.jl
 
 [![Build Status](https://github.com/Fastaxx/CartesianLevelSet.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/Fastaxx/CartesianLevelSet.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 ## Overview
 
-CartesianLevelSet is a Julia package for working with level set geometry on Cartesian grids. It provides functionality for defining signed distance functions (SDFs), generating Cartesian grids, evaluating level sets, computing normals, and visualizing level sets and their intersections with grid cells.
+CartesianLevelSet.jl is a Julia package for working with level set geometry on Cartesian grids. It provides functionality for defining signed distance functions (SDFs), generating Cartesian grids, evaluating level sets, computing normals, and visualizing level sets and their intersections with grid cells.
 
 ## Installation
 

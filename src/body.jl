@@ -8,15 +8,6 @@ function evaluate_sdf(sdf::SignedDistanceFunction, x...)
     return sdf.sdf_function(x...)
 end
 
-# Définir une fonction SDF simple en 2D (un cercle)
-function circle_sdf(x, y)
-    return sqrt(x^2 + y^2) - 1.0
-end
-# Définir une fonction SDF simple en 3D (une sphère)
-function sphere_sdf(x, y, z)
-    return sqrt(x^2 + y^2 + z^2) - 1.0
-end
-
 # Définir une fonction d'union pour les SignedDistanceFunction
 function ⊔(a::SignedDistanceFunction{T}, b::SignedDistanceFunction{T}) where T
     sdf(x::Vararg{Float64}) = min(a.sdf_function(x...), b.sdf_function(x...))
@@ -54,6 +45,20 @@ function compute_normal(sdf::SignedDistanceFunction, x, y)
 
     return nx, ny
 end
+function compute_normal(sdf::SignedDistanceFunction, x, y, z)
+    # Envelopper la fonction SDF dans une fonction prenant un seul argument
+    sdf_func = (p) -> sdf.sdf_function(p[1], p[2], p[3])
+
+    # Calculer la distance et le gradient de la SDF au point (x, y)
+    nx, ny, nz = ForwardDiff.gradient(sdf_func, [x, y, z])
+    # Normaliser le gradient pour obtenir la normale
+    norm = sqrt(nx^2 + ny^2 + nz^2)
+    nx = nx / norm
+    ny = ny / norm
+    nz = nz / norm
+
+    return nx, ny, nz
+end
 
 function compute_curvatures(sdf::SignedDistanceFunction, x, y)
     # Envelopper la fonction SDF dans une fonction prenant un seul argument
@@ -81,7 +86,7 @@ function compute_curvatures(sdf::SignedDistanceFunction, x, y, z)
     K = d2sdf[1,1]*d2sdf[2,2]+d2sdf[1,1]*d2sdf[3,3]+d2sdf[2,2]*d2sdf[3,3]-d2sdf[1,2]^2-d2sdf[1,3]^2-d2sdf[2,3]^2
 end
 
-
+"""
 function sdf_to_curve(X, curve)
     # Define a function to calculate the distance between a point X and the curve for a given t
     squared_distance(t) = sum((X - curve(t)).^2)
@@ -104,4 +109,4 @@ function sdf_to_curve(X, curve)
     # Return the signed distance
     signed_distance = sign * distance
     return signed_distance
-end
+end"""
